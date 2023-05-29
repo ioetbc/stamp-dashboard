@@ -9,8 +9,6 @@ import { LoyaltyCard } from "@/components/settings/loyalty-card"
 import { Rewards } from "@/components/settings/rewards"
 import { Social } from "@/components/settings/socials"
 
-// import { Subscription } from "@/components/settings/subscription"
-
 export default function Page() {
   const { uid } = useAuth()
   const { data, loading, error } = useFetchDocument({
@@ -29,9 +27,7 @@ export default function Page() {
         <div className="flex-1 space-y-4 p-8 pt-6">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-9">
             <div className="col-span-3">
-              <Card title="Details">
-                <Details />
-              </Card>
+              <Details name={data.name} address={data.address} />
             </div>
             <div className="col-span-3">
               <Card
@@ -65,15 +61,6 @@ export default function Page() {
                 <Social />
               </Card>
             </div>
-            {/* <div className="col-span-4">
-              <Card
-                title="Subscriptions"
-                description="Create recurring revenue and loyal customers by offering a
-                    subscriptions."
-              >
-                <Subscription />
-              </Card>
-            </div> */}
           </div>
         </div>
       </div>
