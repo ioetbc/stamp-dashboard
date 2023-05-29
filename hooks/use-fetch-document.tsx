@@ -2,33 +2,44 @@
 
 import { useEffect, useState } from "react"
 import { db } from "@/firebase-config"
-import { doc, getDoc } from "firebase/firestore"
+import { collection, doc, getDoc, getDocs, query } from "firebase/firestore"
+
+import { IFirestore } from "@/types/firestore"
 
 interface UseFetchDocumentProps {
-  collection: string
+  collectionRef: string
   document: string
 }
 
 export const useFetchDocument = ({
-  collection,
+  collectionRef,
   document,
 }: UseFetchDocumentProps) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<IFirestore | null>(null)
 
   useEffect(() => {
-    console.log("wtf document", document)
-    console.log("wtf collection", collection)
+    if (!collectionRef || !document) return
 
-    if (!collection || !document) return
-
-    const docRef = doc(db, collection, document)
+    const docRef = doc(db, collectionRef, document)
 
     getDoc(docRef)
       .then((docSnap) => {
         if (docSnap.exists()) {
           setData(docSnap.data())
+
+          // Fetch loyalty_card subcollection
+          const loyaltyCardRef = collection(docRef, "loyalty_card")
+          getDocs(query(loyaltyCardRef))
+            .then((loyaltyCardSnap) => {
+              const loyaltyCards = loyaltyCardSnap.docs.map((doc) => doc.data())
+              setData((data: any) => ({ ...data, loyalty_card: loyaltyCards }))
+            })
+            .catch((error) => {
+              // set error toast
+              setError(error)
+            })
         } else {
           console.log("No such document!")
           setData(null)

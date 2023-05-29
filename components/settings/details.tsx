@@ -24,8 +24,8 @@ import {
 import { Input } from "../ui/input"
 
 interface DetailsProps {
-  name: string
-  address: string
+  name?: string
+  address?: string
 }
 
 const FormSchema = z.object({
@@ -57,8 +57,11 @@ export const Details = ({ name, address }: DetailsProps) => {
           <CardTitle>Details</CardTitle>
         </CardHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex grow flex-col"
+          >
+            <CardContent className="grow">
               <div className="my-4 grid w-full items-center gap-1.5">
                 <FormField
                   control={form.control}
@@ -98,7 +101,7 @@ export const Details = ({ name, address }: DetailsProps) => {
               </div>
             </CardContent>
 
-            <CardFooter className="ml-auto flex justify-end">
+            <CardFooter className="flex w-full justify-end">
               <Button
                 type="submit"
                 variant={form.formState.isDirty ? "default" : "outline"}

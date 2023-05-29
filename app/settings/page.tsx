@@ -2,7 +2,6 @@
 
 import { useAuth } from "@/hooks/use-auth"
 import { useFetchDocument } from "@/hooks/use-fetch-document"
-import { Card } from "@/components/settings/card"
 import { CustomerRetention } from "@/components/settings/customer-retention"
 import { Details } from "@/components/settings/details"
 import { LoyaltyCard } from "@/components/settings/loyalty-card"
@@ -12,14 +11,12 @@ import { Social } from "@/components/settings/socials"
 export default function Page() {
   const { uid } = useAuth()
   const { data, loading, error } = useFetchDocument({
-    collection: "merchants",
+    collectionRef: "merchants",
     document: uid!,
   })
 
   if (loading) return <div>Loading...</div>
   if (error) return <div>Error: {error}</div>
-
-  console.log("data init", data)
 
   return (
     <>
@@ -27,39 +24,32 @@ export default function Page() {
         <div className="flex-1 space-y-4 p-8 pt-6">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-9">
             <div className="col-span-3">
-              <Details name={data.name} address={data.address} />
+              <Details name={data?.name} address={data?.address} />
             </div>
             <div className="col-span-3">
-              <Card
-                title="Customer retention"
-                description="Configure how we should handle customer retention."
-              >
-                <CustomerRetention />
-              </Card>
+              <CustomerRetention
+                lapsedDayThreshold={data?.customer_retention?.threshold_days}
+                notificationDescription={
+                  data?.customer_retention?.retention_notification
+                }
+              />
             </div>
             <div className="col-span-3">
-              <Card
-                title="Rewards"
-                description="Keep your customers coming back, with random rewards
-                    throughout the month."
-              >
-                <Rewards />
-              </Card>
+              <Rewards rewardsNotification={data?.random_prize?.prize} />
             </div>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-9">
             <div className="col-span-3">
-              <Card
-                title="Loyalty card"
-                description="Configure your loyalty card."
-              >
-                <LoyaltyCard />
-              </Card>
+              <LoyaltyCard
+                numberOfStamps={data?.card?.number_of_stamps}
+                reward={data?.card?.prize}
+              />
             </div>
             <div className="col-span-3">
-              <Card title="Socials">
-                <Social />
-              </Card>
+              <Social
+                instagram={data?.social?.instagram}
+                twitter={data?.social?.twitter}
+              />
             </div>
           </div>
         </div>
