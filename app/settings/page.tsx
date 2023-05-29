@@ -1,19 +1,28 @@
-import { Metadata } from "next"
+"use client"
 
+import { useAuth } from "@/hooks/use-auth"
+import { useFetchDocument } from "@/hooks/use-fetch-document"
 import { Card } from "@/components/settings/card"
 import { CustomerRetention } from "@/components/settings/customer-retention"
 import { Details } from "@/components/settings/details"
 import { LoyaltyCard } from "@/components/settings/loyalty-card"
 import { Rewards } from "@/components/settings/rewards"
 import { Social } from "@/components/settings/socials"
-import { Subscription } from "@/components/settings/subscription"
 
-export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Example dashboard app using the components.",
-}
+// import { Subscription } from "@/components/settings/subscription"
 
 export default function Page() {
+  const { uid } = useAuth()
+  const { data, loading, error } = useFetchDocument({
+    collection: "merchants",
+    document: uid!,
+  })
+
+  if (loading) return <div>Loading...</div>
+  if (error) return <div>Error: {error}</div>
+
+  console.log("data init", data)
+
   return (
     <>
       <div className="flex flex-col">

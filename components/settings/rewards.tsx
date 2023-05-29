@@ -10,7 +10,7 @@ export const Rewards = () => {
   return (
     <div>
       <div className="my-4 grid w-full max-w-sm items-center gap-1.5">
-        <Label htmlFor="lapsed">Frequency</Label>
+        <Label htmlFor="frequency">Frequency</Label>
         <p className="text-sm text-muted-foreground">
           How often should we send rewards to your customers?
         </p>
