@@ -1,8 +1,11 @@
 import React from "react"
+import { db } from "@/firebase-config"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { doc, updateDoc } from "firebase/firestore"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
+import { useAuth } from "@/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -43,6 +46,7 @@ interface SocialProps {
 }
 
 export const Social = ({ instagram, twitter }: SocialProps) => {
+  const { uid } = useAuth()
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -51,8 +55,19 @@ export const Social = ({ instagram, twitter }: SocialProps) => {
     },
   })
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log("data", data)
+    if (!uid) return
+    const merchantRef = doc(db, "merchants", uid)
+
+    try {
+      await updateDoc(merchantRef, { social: data })
+
+      console.log("Document successfully updated!")
+    } catch (error) {
+      console.error("Error updating document: ", error)
+    }
+    form.reset(form.getValues())
   }
   return (
     <Card className="flex h-full flex-col justify-between">

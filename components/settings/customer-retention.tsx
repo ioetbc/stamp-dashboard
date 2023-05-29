@@ -1,8 +1,11 @@
 import React from "react"
+import { db } from "@/firebase-config"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { doc, updateDoc } from "firebase/firestore"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
+import { useAuth } from "@/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -24,33 +27,44 @@ import {
 import { Input } from "../ui/input"
 
 const FormSchema = z.object({
-  lapsedDayThreshold: z.number().min(0, {
+  threshold_days: z.number().min(0, {
     message: "Must be a minimum length of 0",
   }),
-  notificationDescription: z.string().min(5, {
+  retention_notification: z.string().min(5, {
     message: "Description must have a minimum length of 5",
   }),
 })
 
 interface CustomerRetentionProps {
-  lapsedDayThreshold?: number
-  notificationDescription?: string
+  threshold_days?: number
+  retention_notification?: string
 }
 
 export const CustomerRetention = ({
-  lapsedDayThreshold,
-  notificationDescription,
+  threshold_days,
+  retention_notification,
 }: CustomerRetentionProps) => {
+  const { uid } = useAuth()
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      lapsedDayThreshold,
-      notificationDescription,
+      threshold_days,
+      retention_notification,
     },
   })
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log("data", data)
+    if (!uid) return
+    const merchantRef = doc(db, "merchants", uid)
+
+    try {
+      await updateDoc(merchantRef, { customer_retention: data })
+      console.log("Document successfully updated!")
+    } catch (error) {
+      console.error("Error updating document: ", error)
+    }
+    form.reset(form.getValues())
   }
 
   return (
@@ -68,7 +82,7 @@ export const CustomerRetention = ({
               <div className="my-4 grid w-full items-center gap-1.5">
                 <FormField
                   control={form.control}
-                  name="lapsedDayThreshold"
+                  name="threshold_days"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Lapsed day threshold</FormLabel>
@@ -94,7 +108,7 @@ export const CustomerRetention = ({
               <div className="my-4 grid w-full items-center gap-1.5">
                 <FormField
                   control={form.control}
-                  name="notificationDescription"
+                  name="retention_notification"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Notification description</FormLabel>

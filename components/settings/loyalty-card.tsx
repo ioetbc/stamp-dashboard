@@ -1,8 +1,11 @@
 import React from "react"
+import { db } from "@/firebase-config"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { doc, updateDoc } from "firebase/firestore"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
+import { useAuth } from "@/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -24,7 +27,7 @@ import {
 import { Input } from "../ui/input"
 
 const FormSchema = z.object({
-  numberOfStamps: z.number().min(1, {
+  count: z.number().min(1, {
     message: "Must have a min of 1 stamp",
   }),
   reward: z.string().min(5, {
@@ -33,20 +36,31 @@ const FormSchema = z.object({
 })
 
 interface LoyaltyCardProps {
-  numberOfStamps?: number
+  count?: number
   reward?: string
 }
-export const LoyaltyCard = ({ numberOfStamps, reward }: LoyaltyCardProps) => {
+export const LoyaltyCard = ({ count, reward }: LoyaltyCardProps) => {
+  const { uid } = useAuth()
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      numberOfStamps,
+      count,
       reward,
     },
   })
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log("data", data)
+    if (!uid) return
+    const merchantRef = doc(db, "merchants", uid)
+
+    try {
+      await updateDoc(merchantRef, { loyalty_card: data })
+      console.log("Document successfully updated!")
+    } catch (error) {
+      console.error("Error updating document: ", error)
+    }
+    form.reset(form.getValues())
   }
   return (
     <Card className="flex h-full flex-col justify-between">
@@ -63,7 +77,7 @@ export const LoyaltyCard = ({ numberOfStamps, reward }: LoyaltyCardProps) => {
               <div className="my-4 grid w-full items-center gap-1.5">
                 <FormField
                   control={form.control}
-                  name="numberOfStamps"
+                  name="count"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>No. stamps</FormLabel>

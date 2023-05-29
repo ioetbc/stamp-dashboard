@@ -2,10 +2,11 @@
 
 import { useAuth } from "@/hooks/use-auth"
 import { useFetchDocument } from "@/hooks/use-fetch-document"
+import { QrCode } from "@/components/qr-code"
 import { CustomerRetention } from "@/components/settings/customer-retention"
 import { Details } from "@/components/settings/details"
 import { LoyaltyCard } from "@/components/settings/loyalty-card"
-import { Rewards } from "@/components/settings/rewards"
+import { Perks } from "@/components/settings/perks"
 import { Social } from "@/components/settings/socials"
 
 export default function Page() {
@@ -28,21 +29,24 @@ export default function Page() {
             </div>
             <div className="col-span-3">
               <CustomerRetention
-                lapsedDayThreshold={data?.customer_retention?.threshold_days}
-                notificationDescription={
+                threshold_days={data?.customer_retention?.threshold_days}
+                retention_notification={
                   data?.customer_retention?.retention_notification
                 }
               />
             </div>
             <div className="col-span-3">
-              <Rewards rewardsNotification={data?.random_prize?.prize} />
+              <Perks
+                value={data?.perk?.value}
+                frequency_days={data?.perk?.frequency_days}
+              />
             </div>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-9">
             <div className="col-span-3">
               <LoyaltyCard
-                numberOfStamps={data?.card?.number_of_stamps}
-                reward={data?.card?.prize}
+                count={data?.loyalty_card?.count}
+                reward={data?.loyalty_card?.reward}
               />
             </div>
             <div className="col-span-3">

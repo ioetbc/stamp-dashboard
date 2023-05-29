@@ -1,6 +1,6 @@
 interface ILoyaltyCard {
-  number_of_stamps: number
-  prize: string
+  count: number
+  reward: string
 }
 
 interface ICustomerRentention {
@@ -8,9 +8,9 @@ interface ICustomerRentention {
   threshold_days: number
 }
 
-interface IRandomPrize {
-  frequnecy_days: number
-  prize: string
+interface IPerk {
+  frequency_days: number
+  value: string
 }
 
 interface ISocial {
@@ -21,8 +21,8 @@ interface ISocial {
 export interface IFirestore {
   address?: string
   name?: string
-  card?: ILoyaltyCard
+  loyalty_card?: ILoyaltyCard
   customer_retention?: ICustomerRentention
-  random_prize?: IRandomPrize
+  perk?: IPerk
   social?: ISocial
 }
