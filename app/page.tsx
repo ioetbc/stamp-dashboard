@@ -1,7 +1,14 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { Metadata } from "next"
 import Image from "next/image"
+import { db } from "@/firebase-config"
+import { collection, getDocs, query, where } from "firebase/firestore"
 import { Activity, CreditCard, DollarSign, Users } from "lucide-react"
 
+import { User } from "@/types/user"
+import { useAuth } from "@/hooks/use-auth"
 import {
   Card,
   CardContent,
@@ -13,12 +20,56 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Overview } from "@/components/overview"
 import { RecentSales } from "@/components/recent-sales"
 
-export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Example dashboard app using the components.",
+// export const metadata: Metadata = {
+//   title: "Dashboard",
+//   description: "Example dashboard app using the components.",
+// }
+
+const findUsersWithMerchant = async (targetMerchantId: string) => {
+  // Get all user document ids
+  const userSnapshots = await getDocs(collection(db, "users")) // TODO limit this to created_at = today
+  const users = userSnapshots.docs.map((doc) => {
+    const data = {
+      id: doc.id,
+      ...doc.data(),
+    } as User
+
+    return data
+  })
+
+  const matchingUsers = [] as User[]
+
+  for (let user of users) {
+    const q = query(
+      collection(db, `users/${user.id}/merchants`),
+      where("__name__", "==", targetMerchantId)
+    )
+    const querySnapshot = await getDocs(q)
+    if (!querySnapshot.empty) {
+      // This user has the merchant
+      matchingUsers.push(user)
+    }
+  }
+
+  return matchingUsers
 }
 
 export default function DashboardPage() {
+  const { uid } = useAuth()
+  const [matchingUsers, setMatchingUsers] = useState<User[]>([])
+
+  useEffect(() => {
+    if (!uid) return
+    findUsersWithMerchant(uid)
+      .then((result) => {
+        console.log("result", result)
+        setMatchingUsers(result)
+      })
+      .catch((error) => {
+        console.error("Error fetching users: ", error)
+      })
+  }, [uid])
+
   return (
     <>
       <div className="md:hidden">
@@ -126,7 +177,7 @@ export default function DashboardPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <RecentSales />
+                    <RecentSales matchingUsers={matchingUsers} />
                   </CardContent>
                 </Card>
               </div>
